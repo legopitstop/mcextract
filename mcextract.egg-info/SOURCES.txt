@@ -1,0 +1,11 @@
+README.md
+setup.cfg
+setup.py
+mcextract/__init__.py
+mcextract/client.py
+mcextract/server.py
+mcextract.egg-info/PKG-INFO
+mcextract.egg-info/SOURCES.txt
+mcextract.egg-info/dependency_links.txt
+mcextract.egg-info/requires.txt
+mcextract.egg-info/top_level.txt
