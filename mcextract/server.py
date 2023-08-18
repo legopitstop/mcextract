@@ -15,7 +15,7 @@ PATH = os.getcwd()
 # Commands
 # extract <fp> --assets --data --output <output_folder>
 # map <fp> <objects> --output <output_folder>
-# generate <version> --assets --data --reports --output <output_folder>
+# generate <version> --client --server --reports --output <output_folder>
 
 _logger = logging.getLogger('Server')
 
@@ -55,8 +55,10 @@ class Server():
         return getattr(self, '_progressbar', True)
     
     @progressbar.setter
-    def progressbar(self, value:bool):
-        if isinstance(value, bool):
+    def progressbar(self, value:bool|None):
+        if value is None:
+            setattr(self, '_progressbar', True)
+        elif isinstance(value, bool):
             setattr(self, '_progressbar', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
@@ -88,10 +90,12 @@ class Server():
     
     @path.setter
     def path(self, value:str):
-        setattr(self, '_path', str(value))
+        if value is None:
+            setattr(self, '_path', PATH)
+        else: setattr(self, '_path', str(value))
 
     @property
-    def module(self) -> str:
+    def module(self) -> str|None:
         return getattr(self, '_module', None)
     
     @module.setter
@@ -100,28 +104,35 @@ class Server():
 
     @property
     def output(self) -> str:
-        return getattr(self, '_output', os.path.join(os.path.expanduser('~'), 'Desktop', 'Output'))
+        p = os.path.abspath(os.path.expandvars(getattr(self, '_output', os.path.join(self.path, 'Output'))))
+        os.makedirs(p, exist_ok=True)
+        return p
     
     @output.setter
     def output(self, value:str):
-        if value is None:  setattr(self, '_output', os.path.join(os.path.expanduser('~'), 'Desktop', 'Output'))
+        if value is None:  setattr(self, '_output', os.path.join(self.path, 'Output'))
         else: setattr(self, '_output', str(value))
 
     @property
-    def fp(self) -> str:
+    def fp(self) -> str|None:
         return getattr(self, '_fp', None)
     
     @fp.setter
     def fp(self, value:str):
-        setattr(self, '_fp', str(value))
+        if os.path.isfile(value):
+            setattr(self, '_fp', os.path.join(value))
+        else:
+            raise FileNotFoundError(f"No such file or directory '{value}'")
     
     @property
     def assets(self) -> bool:
         return getattr(self, '_assets', False)
     
     @assets.setter
-    def assets(self, value:bool):
-        if isinstance(value, bool):
+    def assets(self, value:bool|None):
+        if value is None:
+            setattr(self, '_assets', False)
+        elif isinstance(value, bool):
             setattr(self, '_assets', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
@@ -131,8 +142,10 @@ class Server():
         return getattr(self, '_data', False)
     
     @data.setter
-    def data(self, value:bool):
-        if isinstance(value, bool):
+    def data(self, value:bool|None):
+        if value is None:
+            setattr(self, '_data', False)
+        elif isinstance(value, bool):
             setattr(self, '_data', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
@@ -142,8 +155,10 @@ class Server():
         return getattr(self, '_client', False)
     
     @client.setter
-    def client(self, value:bool):
-        if isinstance(value, bool):
+    def client(self, value:bool|None):
+        if value is None:
+            setattr(self, '_client', False)
+        elif isinstance(value, bool):
             setattr(self, '_client', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
@@ -153,8 +168,10 @@ class Server():
         return getattr(self, '_server', False)
     
     @server.setter
-    def server(self, value:bool):
-        if isinstance(value, bool):
+    def server(self, value:bool|None):
+        if value is None:
+            setattr(self, '_server', False)
+        elif isinstance(value, bool):
             setattr(self, '_server', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
@@ -164,28 +181,46 @@ class Server():
         return getattr(self, '_reports', False)
     
     @reports.setter
-    def reports(self, value:bool):
-        if isinstance(value, bool):
+    def reports(self, value:bool|None):
+        if value is None:
+            setattr(self, '_reports', False)
+        elif isinstance(value, bool):
             setattr(self, '_reports', value)
         else:
             raise TypeError(f"Expected bool but got '{value}' instead")
     
     @property
-    def objects(self) -> str:
+    def objects(self) -> str|None:
         return getattr(self, '_objects', None)
     
     @objects.setter
     def objects(self, value:str):
-        setattr(self, '_objects', str(value))
+        if os.path.isdir(value):
+            setattr(self, '_objects', os.path.join(value))
+        else:
+            raise FileNotFoundError(f"No such file or directory '{value}'")
     
     @property
-    def version(self) -> str:
+    def version(self) -> str|None:
         return getattr(self, '_version', None)
     
     @version.setter
     def version(self, value:str):
         setattr(self, '_version', str(value))
     
+    @property
+    def eula(self) -> bool|None:
+        return getattr(self, '_eula', None)
+    
+    @eula.setter
+    def eula(self, value:bool):
+        if value is None:
+            setattr(self, '_eula', None)
+        elif isinstance(value, bool):
+            setattr(self, '_eula', value)
+        else:
+            raise TypeError(f"Expected bool but got '{value.__class__.__name__}' instead")
+
     def is_valid_file(self, arg, filetype:str):
         if not os.path.exists(arg):
             self.parser.error("The file %s does not exist!" % arg)
@@ -212,11 +247,13 @@ class Server():
         extract_parser.add_argument('--assets', '-assets', action='store_true')
         extract_parser.add_argument('--data', '-data', action='store_true')
         extract_parser.add_argument('--output', '-o', type=str, const=None)
+        extract_parser.add_argument('--eula', '-eula', action='store_true')
 
         map_parser = subparsers.add_parser('map') # map <fp> <objects>
         map_parser.add_argument(dest='fp', type=lambda x: self.is_valid_file(x, 'json'))
         map_parser.add_argument(dest='objects', type=lambda x: self.is_valid_dir(x))
         map_parser.add_argument('--output', '-o', type=str, const=None)
+        map_parser.add_argument('--eula', '-eula', action='store_true')
 
         generate_parser = subparsers.add_parser('generate') # generate <version> --assets --data --reports
         generate_parser.add_argument(dest='version', type=str)
@@ -224,6 +261,7 @@ class Server():
         generate_parser.add_argument('-server', '--server', action='store_true')
         generate_parser.add_argument('-reports', '--reports', action='store_true')
         generate_parser.add_argument('--output', '-o', type=str, const=None)
+        generate_parser.add_argument('--eula', '-eula', action='store_true')
 
         _args = parser.parse_args(args)
         return self.from_dict(vars(_args))
@@ -340,7 +378,7 @@ class Server():
         
     def _run_generate(self):
         JAVA = os.path.join(os.path.expanduser('~'),'AppData','Local','Packages','Microsoft.4297127D64EC6_8wekyb3d8bbwe','LocalCache','Local','runtime','java-runtime-gamma','windows-x64','java-runtime-gamma','bin', 'java.exe')
-        if not os.path.exists(JAVA):
+        if not os.path.isfile(JAVA):
             _logger.warning('Could not find java.exe at "%s". Using enviroment variable instead.', JAVA)
             JAVA = 'java'
         CACHE = os.path.join(self.output, '.cache')
@@ -349,6 +387,7 @@ class Server():
         
         # Download server
         if not os.path.exists(DATA_CACHE):
+            _logger.info('Downloading %s.jar (This may take a while)', self.version)
             os.makedirs(DATA_CACHE, exist_ok=True)
             serverjars.downloadJar('vanilla', JAR, self.version)
 
@@ -381,19 +420,6 @@ class Server():
 
         _logger.info('Done!')
 
-    def askeula(self) -> bool:
-        """
-        Asks user to agree to the EULA.
-        """
-        res = input("By entering 'y' you agree to Minecraft's EULA. Read https://www.minecraft.net/en-us/eula for more info. Y/n:")
-        if res.lower() == 'y':
-            return True
-        elif res.lower() == 'n':
-            return False
-        else:
-            _logger.warning(f"Invalid response '{res}'")
-            return self.askeula()
-
     def run(self, status_command=None, finish_command=None, logger:bool=True, progressbar:bool=True, eula:bool=None):
         """
         Run the commnad.
@@ -408,22 +434,23 @@ class Server():
 
         `progressbar` - Whether or not it should show the console progressbar.
 
-        `eula` - When true you agree to the EULA and it will not ask.
+        `eula` - When true you agree to the EULA.
         """
-
         self.progressbar = progressbar
         if logger:
             logging.basicConfig(format='[%(asctime)s] [%(name)s/%(levelname)s]: %(message)s', datefmt='%I:%M:%S',handlers=[logging.StreamHandler(sys.stdout)], level=logging.INFO)
         else:
             _logger.disabled = True
 
-        if eula==None:
-            eula = self.askeula()
 
-        if eula==False:
+        if eula is not None: self.eula = eula
+        if self.eula==False:
             _logger.info('You need to agree to the EULA in order to run this tool!')
             return None
         
+        # Print details
+        _logger.info("Output Folder: '%s'", self.output)
+
         if status_command is not None: self.status_command = status_command
         match self.module:
             case 'extract':

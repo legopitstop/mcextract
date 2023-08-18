@@ -1,12 +1,19 @@
 # mcextract
 
+[![PyPI](https://img.shields.io/pypi/v/mcextract)](https://pypi.org/project/mcextract/)
+[![Python](https://img.shields.io/pypi/pyversions/mcextract)](https://www.python.org/downloads//)
+![Downloads](https://img.shields.io/pypi/dm/mcextract)
+![Status](https://img.shields.io/pypi/status/mcextract)
+[![Issues](https://img.shields.io/github/issues/legopitstop/mcextract)](https://github.com/legopitstop/mcextract/issues)
+
 Extract assets and data from the Minecraft jar.
 
-## Install
-Install using python and pip
+## Installation
+Install the module with pip:
+```bat
+pip3 install mcextract
 ```
-pip install mcextract
-```
+Update existing installation: `pip3 install mcextract --upgrade`
 
 ## Features
 
@@ -43,10 +50,11 @@ Now run the Python script using the commands listed below
 |`--assets`|| Extract all files in assets folder. |
 |`--data`|| Extract all files in data folder. |
 |`--output <directory>`|| The output directory. |
+|`--eula`|Yes| Except the EULA. ||
 
 #### Example
 ```
-python main.py extract "%appdata%\.minecraft\versions\1.20.1\1.20.1.jar" --assets --data --output "%userprofile%\Downloads\Output"
+python -m mcextract extract "%appdata%\.minecraft\versions\1.20.1\1.20.1.jar" --assets --data --eula --output "%userprofile%\Downloads\Output"
 ```
 
 ### map
@@ -56,25 +64,27 @@ python main.py extract "%appdata%\.minecraft\versions\1.20.1\1.20.1.jar" --asset
 |`<index>`|Yes| The index JSON to map objects with. Located: `%appdata%\.minecraft\assets\indexes\INDEX.json`|
 |`<objects>`| Yes | The directory that contains all objects. Located: `%appdata%\.minecraft\assets\objects`|
 |`--output <directory>`|| The output directory. |
+|`--eula`|Yes| Except the EULA. ||
 
 #### Example
 ```
-python main.py map "%appdata%\.minecraft\assets\indexes\3.json" "%appdata%\.minecraft\assets\objects" --output "%userprofile%\Downloads\Output"
+python -m mcextract map "%appdata%\.minecraft\assets\indexes\3.json" "%appdata%\.minecraft\assets\objects" --eula --output "%userprofile%\Downloads\Output"
 ```
 
 ### generate
 #### Arguments
-| Name |Required| Description |
-|--|--|--|
-|`<version>`|Yes| The server jar version to download and use. |
-|`--client`|| Generate client data. |
-|`--server`|| Generate server data. |
-|`--reports`|| Generate reports. |
-|`--output <directory>`|| The output directory. |
+| Name |Required| Description | Example|
+|--|--|--|--|
+|`<version>`|Yes| The server jar version to download and use. |`1.20.1`|
+|`--client`|| Generate client data. ||
+|`--server`|| Generate server data. ||
+|`--reports`|| Generate reports. ||
+|`--output <directory>`|| The output directory. ||
+|`--eula`|Yes| Except the EULA. ||
 
 #### Example
 ```
-python main.py generate 1.20.1 --client --server --reports --output "%userprofile%\Downloads\Output"
+python -m mcextract generate 1.20.1 --client --server --reports --eula --output "%userprofile%\Downloads\Output"
 ```
 
 ## Planned Features
