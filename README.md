@@ -5,6 +5,7 @@
 ![Downloads](https://img.shields.io/pypi/dm/mcextract)
 ![Status](https://img.shields.io/pypi/status/mcextract)
 [![Issues](https://img.shields.io/github/issues/legopitstop/mcextract)](https://github.com/legopitstop/mcextract/issues)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
 Extract assets and data from the Minecraft jar.
 
@@ -17,76 +18,50 @@ Update existing installation: `pip3 install mcextract --upgrade`
 
 ## Features
 
-- Includes a UI and a command line extractor.
-- Saves configuration for the next time you use it.
-- Choose to extract the assets or data folders from the jar
-- Compile the objects to get access to all sounds, langs, and other hidden assets that aren't in the jar.
-- Choose which version to extract using a simple dropdown menu. (may experience some issues if your mc is located in diff folder)
-- Data Generator for generating reports, and vanilla world generation files.
+- Easy to use command line interface.
+- Choose to extract the assets or data folders from the Minecraft jar
+- Map objects to get access to all sounds, langs, and other hidden assets that aren't in the jar.
+- Run the built-in data generator to get reports, registries, and vanilla world generation files.
 
 ## Examples
-### Run with UI
+
+### Run using the API
 ```py
 import mcextract
 
-app=mcextract.CTkClient()
-app.mainloop()
+api = mcextract.MCExtractAPI()
+api.extract("1.20.4/1.20.4.jar", True, True, accept_eula=False)
+api.map("16.json", accept_eula=True)
+api.generate("1.20.6", ['--client', '--server', '--reports'], accept_eula=True)
 ```
-### Run with the command line
-```py
-import mcextract
 
-svr=mcextract.Server.from_args()
-svr.run()
+### Run using CLI
+```sh
+mcextract extract 1.20.4/1.20.4.jar --assets --data -eula
+mcextract map 16.json -eula
+mcextract generate 1.20.6 --client --server --reports -eula
 ```
-Now run the Python script using the commands listed below
 
 ## Command line commands
-### extract
-#### Arguments
-| Name |Required| Description |
-|--|--|--|
-|`<fp>`|Yes| The jar file to extract. Located: `%appdata%\.minecraft\versions\VERSION\VERSION.jar`|
-|`--assets`|| Extract all files in assets folder. |
-|`--data`|| Extract all files in data folder. |
-|`--output <directory>`|| The output directory. |
-|`--eula`|Yes| Except the EULA. ||
-
-#### Example
 ```
-python -m mcextract extract "%appdata%\.minecraft\versions\1.20.1\1.20.1.jar" --assets --data --eula --output "%userprofile%\Downloads\Output"
-```
+usage: mcextract [-h] [-V] {extract,map,generate} ...
 
-### map
-#### Arguments
-| Name |Required| Description |
-|--|--|--|
-|`<index>`|Yes| The index JSON to map objects with. Located: `%appdata%\.minecraft\assets\indexes\INDEX.json`|
-|`<objects>`| Yes | The directory that contains all objects. Located: `%appdata%\.minecraft\assets\objects`|
-|`--output <directory>`|| The output directory. |
-|`--eula`|Yes| Except the EULA. ||
+positional arguments:
+  {extract,map,generate}
+    extract             Extract data or assets folders from the Minecraft jar.
+    map                 Maps Minecraft's objects using an index file.
+    generate            Use Minecraft's built-in data generator.
 
-#### Example
-```
-python -m mcextract map "%appdata%\.minecraft\assets\indexes\3.json" "%appdata%\.minecraft\assets\objects" --eula --output "%userprofile%\Downloads\Output"
-```
-
-### generate
-#### Arguments
-| Name |Required| Description | Example|
-|--|--|--|--|
-|`<version>`|Yes| The server jar version to download and use. |`1.20.1`|
-|`--client`|| Generate client data. ||
-|`--server`|| Generate server data. ||
-|`--reports`|| Generate reports. ||
-|`--output <directory>`|| The output directory. ||
-|`--eula`|Yes| Except the EULA. ||
-
-#### Example
-```
-python -m mcextract generate 1.20.1 --client --server --reports --eula --output "%userprofile%\Downloads\Output"
+options:
+  -h, --help            show this help message and exit
+  -V, --version         print the mcextract version number and exit.
 ```
 
 ## Planned Features
 
-- Add minimize or maximize JSON's.
+- Add minimize or maximize JSONs.
+
+
+## License
+
+This project's source code is under the MIT license and the Minecraft EULA. 

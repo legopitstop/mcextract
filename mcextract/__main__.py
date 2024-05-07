@@ -1,7 +1,4 @@
-__version__ = '1.0.0'
+from .cli import main
 
-from .server import Server
-
-if __name__== '__main__':
-    app=Server.from_args()
-    app.run()
+if __name__ == "__main__":
+    main()
